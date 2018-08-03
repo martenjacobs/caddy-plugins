@@ -3,7 +3,7 @@
 #
 FROM abiosoft/caddy:builder as builder
 
-ARG plugins="git,filemanager,cors,realip,expires,cache"
+ARG plugins="git,filemanager,cors,realip,expires,cache,login,jwt"
 
 # process wrapper
 RUN go get -v github.com/abiosoft/parent
