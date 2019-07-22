@@ -3,23 +3,36 @@
 #
 FROM abiosoft/caddy:builder as builder
 
-ARG plugins="git,filemanager,cors,realip,expires,cache,login,jwt"
+ARG version="1.0.1"
+ARG plugins="git,cors,realip,expires,cache,cloudflare,filemanager,login,jwt"
+ARG enable_telemetry="true"
 
 # process wrapper
 RUN go get -v github.com/abiosoft/parent
 
-RUN PLUGINS=${plugins} /bin/sh /usr/bin/builder.sh
+RUN VERSION=${version} PLUGINS=${plugins} ENABLE_TELEMETRY=${enable_telemetry} /bin/sh /usr/bin/builder.sh
 
 #
 # Final stage
 #
-FROM alpine:3.7
-LABEL maintainer "Abiola Ibrahim <abiola89@gmail.com>"
+FROM alpine:3.10
+LABEL maintainer "Marten Jacobs <marten.jacobs@gmail.com>"
+
+ARG version="1.0.1"
+LABEL caddy_version="$version"
 
 # Let's Encrypt Agreement
 ENV ACME_AGREE="false"
 
-RUN apk add --no-cache openssh-client git
+# Telemetry Stats
+ENV ENABLE_TELEMETRY="$enable_telemetry"
+
+RUN apk add --no-cache \
+    ca-certificates \
+    git \
+    mailcap \
+    openssh-client \
+    tzdata
 
 # install caddy
 COPY --from=builder /install/caddy /usr/bin/caddy
